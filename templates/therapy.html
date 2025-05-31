@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Therapy and Support Resources</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+.mental-health-tips {
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, rgba(150, 150, 150, 0.4), rgba(120, 120, 120, 0.3));
+  color: black;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.mental-health-tips .section-title {
+  text-align: center;
+  font-size: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-bottom: 1rem;
+  color: #083adf;
+}
+.mental-health-tips .intro {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  font-size: 1.1rem;
+  color: black;
+}
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+.tip-card {
+  background: #fff;
+  border: 2px solid #d0d7ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s, transform 0.3s;
+}
+.tip-card:hover {
+  border-color: #3056d3;
+  transform: translateY(-5px);
+}
+.tip-card h3 {
+  color: #3056d3;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.tip-card p {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+}
+</style>
+
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-blue-50 to-green-100 min-h-screen text-gray-800 font-sans">
+<div class="fixed inset-0 bg-gray-900 bg-opacity-30 pointer-events-none z-0"></div>
+ <!-- Page Content -->
+  <div class="relative z-10">
+  <!-- Banner -->
+  <div class="w-full max-w-4xl mx-auto mt-8 px-4">
+    <img src="{{ url_for('static', filename='dsu1.png') }}" alt="Support Banner"
+         class="rounded-xl shadow-xl w-full h-auto object-cover" />
+  </div>
+
+  <!-- Intro Section -->
+  <section class="text-center py-16 px-4">
+    <h2 class="text-5xl font-extrabold mb-4 text-gray-800">Therapy & Support</h2>
+    <p class="text-lg text-black-600 max-w-2xl mx-auto">
+      Tools, habits, and support to strengthen your mental well-being and emotional resilience.
+    </p>
+  </section>
+  <section class="bg-white bg-opacity-20 backdrop-blur-md rounded-xl shadow-lg p-6 max-w-3xl mx-auto mt-12 mb-20 border border-gray-300">
+  <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">🧠 Daily Mental Health Tracker</h2>
+  <p class="text-center text-gray-700 mb-6">Tick off the habits you’ve completed today!</p>
+
+  <form id="trackerForm" class="space-y-3 text-gray-700">
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="water" class="w-5 h-5 text-blue-500" />
+      <label for="water">💧 Drink 2L Water</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="sleep" class="w-5 h-5 text-blue-500" />
+      <label for="sleep">🛌 7–8 Hours Sleep</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="diet" class="w-5 h-5 text-blue-500" />
+      <label for="diet">🥗 Healthy Diet</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="meditation" class="w-5 h-5 text-blue-500" />
+      <label for="meditation">🧘‍♂️ Meditation</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="yoga" class="w-5 h-5 text-blue-500" />
+      <label for="yoga">🧎‍♀️ Yoga</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="workout" class="w-5 h-5 text-blue-500" />
+      <label for="workout">🏋️‍♂️ Workout</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="coldshower" class="w-5 h-5 text-blue-500" />
+      <label for="coldshower">🧊 Cold Shower</label>
+    </div>
+    <div class="flex items-center space-x-3">
+      <input type="checkbox" id="walk" class="w-5 h-5 text-blue-500" />
+      <label for="walk">🚶 Walk / Fresh Air</label>
+    </div>
+
+    <div class="flex justify-center gap-4 mt-6">
+      <button type="button" id="saveBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-xl shadow-md transition">✅ Done</button>
+      <button type="button" id="resetBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-xl shadow-md transition">🔄 Reset</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  const habitIds = [
+    "water",
+    "sleep",
+    "diet",
+    "meditation",
+    "yoga",
+    "workout",
+    "coldshower",
+    "walk"
+  ];
+
+  // Load saved data
+  habitIds.forEach(id => {
+    const saved = localStorage.getItem(`habit_${id}`);
+    if (saved === "true") {
+      document.getElementById(id).checked = true;
+    }
+  });
+
+  // Save data on "Done" button click
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    habitIds.forEach(id => {
+      const checked = document.getElementById(id).checked;
+      localStorage.setItem(`habit_${id}`, checked);
+    });
+    alert("✅ Habits saved successfully!");
+  });
+
+  // Reset data on "Reset" button click
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    habitIds.forEach(id => {
+      document.getElementById(id).checked = false;
+      localStorage.removeItem(`habit_${id}`);
+    });
+    alert("🔄 Tracker has been reset.");
+  });
+</script>
+
+
+  <!-- Card Section -->
+  <section class="px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    
+    <!-- Eat Well Card -->
+    <div class="group bg-black bg-opacity-70 rounded-2xl border border-red-400 hover:border-yellow-600 shadow-md hover:shadow-lg p-6 transition-all duration-300 text-blue-300">
+      <h3 class="text-2xl font-semibold mb-2">🍎 Eat Well</h3>
+      <p class="text-green-200">Boost energy & mood with healthy food habits.</p>
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-sm space-y-1">
+        <p>• Stay hydrated (2L/day)</p>
+        <p>• Balanced meals: fruits, veggies, grains</p>
+        <p>• Reduce sugar & caffeine</p>
+      </div>
+    </div>
+
+    <!-- Sleep Card -->
+    <div class="group bg-black bg-opacity-70 rounded-2xl border border-red-400 hover:border-yellow-600 shadow-md hover:shadow-lg p-6 transition-all duration-300 text-blue-300">
+      <h3 class="text-2xl font-semibold mb-2">😴 Sleep Better</h3>
+      <p class="text-green-200">Sleep well to heal and refresh your mind.</p>
+      <div class="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-sm space-y-1">
+        <p>• Fixed sleep schedule</p>
+        <p>• No screens before bed</p>
+        <p>• Avoid caffeine after 2PM</p>
+        <p>• Relaxing night routine</p>
+      </div>
+    </div>
+
+   <!-- Study Smart Card -->
+<div class="group bg-black bg-opacity-70 rounded-2xl border border-red-400 hover:border-yellow-600 shadow-md hover:shadow-lg p-6 transition-all duration-300 text-blue-300">
+  <h3 class="text-2xl font-semibold mb-2">📚 Study Smart</h3>
+  <p class="text-green-200">Learn efficiently and keep stress away.</p>
+  <div class="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-sm space-y-1">
+    <p>• Pomodoro: 25/5 focus blocks</p>
+    <p>• Declutter your desk</p>
+    <p>• Prioritize tasks</p>
+  </div>
+</div>
+<!-- Calm Mind Card -->
+<div class="group bg-black bg-opacity-70 rounded-2xl border border-red-400 hover:border-yellow-600 shadow-md hover:shadow-lg p-6 transition-all duration-300 text-blue-300">
+  <h3 class="text-2xl font-semibold mb-2">🧘 Calm Your Mind</h3>
+  <p class="text-green-200">Daily practices to reduce stress and anxiety.</p>
+  <div class="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-sm space-y-1">
+    <p>• Box breathing</p>
+        <p>• Body scan meditation</p>
+        <p>• Listen to calming sounds</p>
+  </div>
+</div>
+
+    <!-- Daily Checklist -->
+    <div class="group bg-black bg-opacity-70 rounded-2xl border border-red-400 hover:border-yellow-600 shadow-md hover:shadow-lg p-6 transition-all duration-300 text-blue-300 md:col-span-2">
+      <h3 class="text-2xl font-semibold mb-2">📋 Daily Checklist</h3>
+      <p class="text-green-200">Stay on track with simple goals each day.</p>
+      <ul class="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-sm space-y-1">
+        <li>✅ 2L Water</li>
+        <li>✅ 10 min meditation</li>
+        <li>✅ 3 breathing breaks</li>
+        <li>✅ 7-8 hours sleep</li>
+        <li>✅ No negative self-talk</li>
+        <li>✅ Light movement</li>
+      </ul>
+    </div>
+
+  </section>
+
+<!-- Mental Health Awareness Section (Add this before your footer) -->
+<section class="mental-health-tips">
+  <div class="container">
+    <h2 class="section-title">Ways to Strengthen Your Mental Health</h2>
+    <p class="intro">
+      Mental well-being is just as vital as physical health. Here are practical and meaningful ways to build emotional resilience and boost your psychological wellness.
+    </p>
+
+    <div class="tips-grid">
+      <div class="tip-card">
+        <h3>Understand Your Mind</h3>
+        <p>Learn about your emotions and how your thoughts affect behavior. Self-awareness is the first step to mental clarity.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Develop Healthy Routines</h3>
+        <p>Maintain a consistent sleep cycle, eat nutritious meals, and keep your body active. Your brain thrives on balance.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Foster Meaningful Connections</h3>
+        <p>Build strong bonds through supportive friendships and community involvement. Social support is key to emotional resilience.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Practice Mindfulness</h3>
+        <p>Be present. Engage in meditation, breathing exercises, or reflective journaling to center your thoughts and reduce stress.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Seek Professional Guidance</h3>
+        <p>There’s strength in reaching out. Therapy, coaching, or support groups can provide clarity during mental challenges.</p>
+      </div>
+    </div>
+  </div>
+</section>
+  <!-- Support Resources -->
+  <section class="bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-8 rounded-2xl max-w-3xl mx-auto shadow-lg mt-12 mb-20 border border-purple-200">
+  <h2 class="text-2xl font-bold text-purple-800 mb-4">You’re Not Alone — Prioritize Your Mental Well-being</h2>
+  <p class="text-md mb-6 text-gray-800 leading-relaxed">
+    Taking care of your mind is just as important as taking care of your body. Whether you're feeling overwhelmed, anxious, or simply not yourself — it's okay to seek help.
+  </p>
+  <ul class="list-disc list-inside text-gray-700 space-y-3 pl-2">
+    <li>Connect with licensed therapists in your area</li>
+    <li>Explore platforms like <span class="font-semibold">BetterHelp</span> or <span class="font-semibold">Talkspace</span> for online support</li>
+    <li>Call your regional or national mental health helpline</li>
+    <li>Talk to friends, family, or someone you trust — a simple conversation can make a difference</li>
+    <li>Practice daily mindfulness, journaling, or breathing exercises to manage stress</li>
+  </ul>
+  <div class="mt-8 text-right">
+    <a href="/" class="inline-block text-purple-700 hover:text-purple-900 font-semibold underline transition duration-300 ease-in-out">
+      ← Back to Prediction
+    </a>
+  </div>
+</section>
+</div>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white text-center py-6">
+    <p class="text-sm">&copy; 2025 MindSpace — You are not alone. You are enough. 💚</p>
+  </footer>
+
+</body>
+</html>
