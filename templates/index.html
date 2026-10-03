@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mental Health: Depression Prediction</title>
+    <title>Student Mental Health &mdash; Risk Screening</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for enhanced typography, label backgrounds, and animations */
@@ -60,67 +60,88 @@
     <img src="{{ url_for('static', filename='mental_health.png') }}" alt="Mental Health" class="w-80 rounded-lg shadow-xl border-4 border-white">
 </div>
 
+      {% if errors %}
+      <div class="mt-6 p-4 bg-red-50 border border-red-300 text-red-800 rounded-xl max-w-2xl mx-auto" role="alert" aria-live="assertive">
+        <p class="font-semibold mb-1">Please correct the following:</p>
+        <ul class="list-disc list-inside text-sm space-y-1">
+          {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
       {% if prediction %}
         <div class="mt-8 p-6 bg-white rounded-xl shadow-lg max-w-lg mx-auto result-box">
-            {% if prediction == 'No' %}
-            <h2 class="text-2xl font-semibold text-green-600">You are healthy!</h2>
-            <p class="text-lg text-gray-700 mt-2">Great news! Based on the provided information, you have a {{ probability }}% chance of depression, indicating a low risk. Keep maintaining a balanced lifestyle and reach out if you need support!</p>
+            <h2 class="text-2xl font-semibold {{ 'text-amber-600' if risk_band == 'elevated' else 'text-green-600' }}">
+              {{ 'Elevated model-estimated risk' if risk_band == 'elevated' else 'Lower model-estimated risk' }}
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+              Model risk score: <strong>{{ probability }}%</strong>
+              (decision threshold {{ (threshold * 100) | round(0) | int }}%)
+            </p>
+            {% if risk_band == 'lower' %}
+            <p class="text-lg text-gray-700 mt-3">Based on the answers provided, this score falls
+              <strong>below</strong> the decision threshold. That indicates a lower model-estimated
+              risk &mdash; it is not a confirmation that everything is fine. Keep maintaining a
+              balanced lifestyle, and reach out for support any time you need it.</p>
             {% else %}
-            <h2 class="text-2xl font-semibold text-red-600">Depression Risk Detected</h2>
-            <p class="text-lg text-gray-700 mt-2">The model predicts a {{ probability }}% chance of depression, suggesting a potential risk. We recommend exploring support options.</p>
-            <a href="/therapy" class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-semibold">Learn about therapy and support options</a>
+            <p class="text-lg text-gray-700 mt-3">Based on the answers provided, this score falls
+              <strong>above</strong> the decision threshold. That indicates an elevated
+              model-estimated risk worth paying attention to. Consider reviewing the support
+              options, and speak to a qualified professional if these answers reflect how you
+              have actually been feeling.</p>
+            <a href="/therapy" class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-semibold">View wellbeing tips and support options</a>
             {% endif %}
         </div>
         {% endif %}
+        <p class="mt-4 mb-6 text-xs text-gray-600 max-w-2xl mx-auto text-center leading-relaxed">{{ disclaimer }}</p>
         <form method="POST" class="bg-white p-8 rounded-xl shadow-2xl">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Enter Student Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8"> <!-- Increased gap with gap-8 -->
                 <!-- Left Column -->
                 <div>
                     <div class="mb-4">
-                        <label class="form-label">Age</label>
-                        <input type="number" name="Age" class="form-input w-full p-3 rounded-md focus:outline-none" required>
+                        <label class="form-label" for="Age">Age</label>
+                        <input type="number" id="Age" name="Age" min="10" max="100" step="1" value="{{ form_data.get('Age', '') }}" class="form-input w-full p-3 rounded-md focus:outline-none" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">CGPA</label>
-                        <input type="number" step="0.1" name="CGPA" class="form-input w-full p-3 rounded-md focus:outline-none" required>
+                        <label class="form-label" for="CGPA">CGPA</label>
+                        <input type="number" id="CGPA" name="CGPA" min="0" max="10" step="0.01" value="{{ form_data.get('CGPA', '') }}" class="form-input w-full p-3 rounded-md focus:outline-none" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Work/Study Hours (per day)</label>
-                        <input type="number" step="0.1" name="Work_Study_Hours" class="form-input w-full p-3 rounded-md focus:outline-none" required>
+                        <label class="form-label" for="Work_Study_Hours">Work/Study Hours (per day)</label>
+                        <input type="number" id="Work_Study_Hours" name="Work_Study_Hours" min="0" max="24" step="0.1" value="{{ form_data.get('Work_Study_Hours', '') }}" class="form-input w-full p-3 rounded-md focus:outline-none" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Suicidal Thoughts</label>
-                        <select name="Suicidal_thoughts" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
+                        <label class="form-label" for="Suicidal_thoughts">Suicidal Thoughts</label>
+                        <select name="Suicidal_thoughts" id="Suicidal_thoughts" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="No"{{ ' selected' if form_data.get('Suicidal_thoughts') == 'No' else '' }}>No</option>
+                            <option value="Yes"{{ ' selected' if form_data.get('Suicidal_thoughts') == 'Yes' else '' }}>Yes</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Family History of Mental Illness</label>
-                        <select name="Family_History" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
+                        <label class="form-label" for="Family_History">Family History of Mental Illness</label>
+                        <select name="Family_History" id="Family_History" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="No"{{ ' selected' if form_data.get('Family_History') == 'No' else '' }}>No</option>
+                            <option value="Yes"{{ ' selected' if form_data.get('Family_History') == 'Yes' else '' }}>Yes</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Gender</label>
-                        <select name="Gender" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="Female">Female</option>
-                            <option value="Male">Male</option>
+                        <label class="form-label" for="Gender">Gender</label>
+                        <select name="Gender" id="Gender" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="Female"{{ ' selected' if form_data.get('Gender') == 'Female' else '' }}>Female</option>
+                            <option value="Male"{{ ' selected' if form_data.get('Gender') == 'Male' else '' }}>Male</option>
                         </select>
                     </div>
                 </div>
                 <!-- Right Column -->
                 <div>
                     <div class="mb-4">
-                        <label class="form-label">Sleep Duration</label>
-                        <select name="Sleep_Duration" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="Less than 5 hours">Less than 5 hours</option>
-                            <option value="5-6 hours">5-6 hours</option>
-                            <option value="6-7 hours">6-7 hours</option>
-                            <option value="7-8 hours">7-8 hours</option>
-                            <option value="More than 8 hours">More than 8 hours</option>
+                        <label class="form-label" for="Sleep_Duration">Sleep Duration</label>
+                        <select name="Sleep_Duration" id="Sleep_Duration" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="Less than 5 hours"{{ ' selected' if form_data.get('Sleep_Duration') == 'Less than 5 hours' else '' }}>Less than 5 hours</option>
+                            <option value="5-6 hours"{{ ' selected' if form_data.get('Sleep_Duration') == '5-6 hours' else '' }}>5-6 hours</option>
+                            <option value="7-8 hours"{{ ' selected' if form_data.get('Sleep_Duration') == '7-8 hours' else '' }}>7-8 hours</option>
+                            <option value="More than 8 hours"{{ ' selected' if form_data.get('Sleep_Duration') == 'More than 8 hours' else '' }}>More than 8 hours</option>
                         </select>
                     </div>
                     <div class="mb-4">
@@ -132,58 +153,58 @@
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Region</label>
-                        <select name="region" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="South">South</option>
-                            <option value="North">North</option>
-                            <option value="West">West</option>
-                            <option value="East">East</option>
-                            <option value="Central">Central</option>
+                        <label class="form-label" for="region">Region</label>
+                        <select name="region" id="region" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="South"{{ ' selected' if form_data.get('region') == 'South' else '' }}>South</option>
+                            <option value="North"{{ ' selected' if form_data.get('region') == 'North' else '' }}>North</option>
+                            <option value="West"{{ ' selected' if form_data.get('region') == 'West' else '' }}>West</option>
+                            <option value="East"{{ ' selected' if form_data.get('region') == 'East' else '' }}>East</option>
+                            <option value="Central"{{ ' selected' if form_data.get('region') == 'Central' else '' }}>Central</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Degree Group</label>
-                        <select name="degree_group" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="School">School</option>
-                            <option value="Bachelor">Bachelor</option>
-                            <option value="Master">Master</option>
-                            <option value="Doctorate">Doctorate</option>
-                            <option value="Professional">Professional</option>
+                        <label class="form-label" for="degree_group">Degree Group</label>
+                        <select name="degree_group" id="degree_group" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="School"{{ ' selected' if form_data.get('degree_group') == 'School' else '' }}>School</option>
+                            <option value="Bachelor"{{ ' selected' if form_data.get('degree_group') == 'Bachelor' else '' }}>Bachelor</option>
+                            <option value="Master"{{ ' selected' if form_data.get('degree_group') == 'Master' else '' }}>Master</option>
+                            <option value="Doctorate"{{ ' selected' if form_data.get('degree_group') == 'Doctorate' else '' }}>Doctorate</option>
+                            <option value="Professional"{{ ' selected' if form_data.get('degree_group') == 'Professional' else '' }}>Professional</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Financial Stress</label>
-                        <select name="Financial_Stress" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="Very Low">Very Low</option>
-                            <option value="Low">Low</option>
-                            <option value="Moderate">Moderate</option>
-                            <option value="High">High</option>
-                            <option value="Very High">Very High</option>
+                        <label class="form-label" for="Financial_Stress">Financial Stress</label>
+                        <select name="Financial_Stress" id="Financial_Stress" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="Very Low"{{ ' selected' if form_data.get('Financial_Stress') == 'Very Low' else '' }}>Very Low</option>
+                            <option value="Low"{{ ' selected' if form_data.get('Financial_Stress') == 'Low' else '' }}>Low</option>
+                            <option value="Moderate"{{ ' selected' if form_data.get('Financial_Stress') == 'Moderate' else '' }}>Moderate</option>
+                            <option value="High"{{ ' selected' if form_data.get('Financial_Stress') == 'High' else '' }}>High</option>
+                            <option value="Very High"{{ ' selected' if form_data.get('Financial_Stress') == 'Very High' else '' }}>Very High</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Study Satisfaction</label>
-                        <select name="Study_Satisfaction" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="Very Dissatisfied">Very Dissatisfied</option>
-                            <option value="Dissatisfied">Dissatisfied</option>
-                            <option value="Neutral">Neutral</option>
-                            <option value="Satisfied">Satisfied</option>
-                            <option value="Very Satisfied">Very Satisfied</option>
+                        <label class="form-label" for="Study_Satisfaction">Study Satisfaction</label>
+                        <select name="Study_Satisfaction" id="Study_Satisfaction" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="Very Dissatisfied"{{ ' selected' if form_data.get('Study_Satisfaction') == 'Very Dissatisfied' else '' }}>Very Dissatisfied</option>
+                            <option value="Dissatisfied"{{ ' selected' if form_data.get('Study_Satisfaction') == 'Dissatisfied' else '' }}>Dissatisfied</option>
+                            <option value="Neutral"{{ ' selected' if form_data.get('Study_Satisfaction') == 'Neutral' else '' }}>Neutral</option>
+                            <option value="Satisfied"{{ ' selected' if form_data.get('Study_Satisfaction') == 'Satisfied' else '' }}>Satisfied</option>
+                            <option value="Very Satisfied"{{ ' selected' if form_data.get('Study_Satisfaction') == 'Very Satisfied' else '' }}>Very Satisfied</option>
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Academic Pressure</label>
-                        <select name="Academic_Pressure" class="form-select w-full p-3 rounded-md focus:outline-none" required>
-                            <option value="Very Low Pressure">Very Low Pressure</option>
-                            <option value="Low Pressure">Low Pressure</option>
-                            <option value="Moderate Pressure">Moderate Pressure</option>
-                            <option value="High Pressure">High Pressure</option>
-                            <option value="Very High Pressure">Very High Pressure</option>
+                        <label class="form-label" for="Academic_Pressure">Academic Pressure</label>
+                        <select name="Academic_Pressure" id="Academic_Pressure" class="form-select w-full p-3 rounded-md focus:outline-none" required>
+                            <option value="Very Low Pressure"{{ ' selected' if form_data.get('Academic_Pressure') == 'Very Low Pressure' else '' }}>Very Low Pressure</option>
+                            <option value="Low Pressure"{{ ' selected' if form_data.get('Academic_Pressure') == 'Low Pressure' else '' }}>Low Pressure</option>
+                            <option value="Moderate Pressure"{{ ' selected' if form_data.get('Academic_Pressure') == 'Moderate Pressure' else '' }}>Moderate Pressure</option>
+                            <option value="High Pressure"{{ ' selected' if form_data.get('Academic_Pressure') == 'High Pressure' else '' }}>High Pressure</option>
+                            <option value="Very High Pressure"{{ ' selected' if form_data.get('Academic_Pressure') == 'Very High Pressure' else '' }}>Very High Pressure</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition duration-300 mt-6 font-semibold">Predict</button>
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition duration-300 mt-6 font-semibold">Estimate risk</button>
         </form>  
     </div>
 </body>

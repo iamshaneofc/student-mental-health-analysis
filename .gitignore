@@ -1,0 +1,54 @@
+# --- Python virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.project-venv/
+project/
+
+# --- Python caches / build artifacts ---
+__pycache__/
+*.py[cod]
+*$pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- OS / editor ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+._*
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# --- Local / personal archives (not part of the codebase) ---
+Original/
+
+# --- Generated reports & scratch output ---
+artifacts/report/
+*.log
